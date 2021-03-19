@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import {addSmurf, setErrorMessage} from '../actions/index'
 
 const AddForm = (props) => {
-    const [state, setState] = useState({
-        name:"",
-        position:"",
-        nickname:"",
-        description:""
-    });
+
+    //added initialState to clear form after submit and keep code DRY
+    const initialState = {
+    name:"",
+    position:"",
+    nickname:"",
+    description:""
+    }
+
+    const [state, setState] = useState(initialState);
 
     const handleChange = e => {
         setState({
@@ -18,11 +24,12 @@ const AddForm = (props) => {
     const handleSubmit = e => {
         e.preventDefault();
         if (state.name === "" || state.position === "" || state.nickname === "") {
-            errorMessage = "Name, position and nickname fields are required.";
+            return props.setErrorMessage("Name, position and nickname fields are required.");
         }
+        props.addSmurf(state); //i passed state as an argument instead of passing all keys separately, because it looks better and helps avoid typos (in my opinion)
+        setState(initialState);
     }
 
-    const errorMessage = "";
 
     return(<section>
         <h2>Add Smurf</h2>
@@ -44,14 +51,20 @@ const AddForm = (props) => {
                 <textarea onChange={handleChange} value={state.description} name="description" id="description" />
             </div>
             {
-                errorMessage && <div data-testid="errorAlert" className="alert alert-danger" role="alert">Error: {errorMessage}</div>
+                props.errorMessage && <div data-testid="errorAlert" className="alert alert-danger" role="alert">Error: {props.errorMessage}</div>
             }
             <button>Submit Smurf</button>
         </form>
     </section>);
 }
 
-export default AddForm;
+const mapStateToProps = state => {
+    return {
+        errorMessage: state.errorMessage
+    }
+}
+
+export default connect(mapStateToProps,{addSmurf, setErrorMessage})(AddForm);
 
 //Task List:
 //1. Connect the errorMessage, setError and addSmurf actions to the AddForm component.
